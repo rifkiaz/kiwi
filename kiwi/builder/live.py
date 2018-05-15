@@ -193,20 +193,6 @@ class LiveImageBuilder(object):
             container_image.name, self.media_dir + '/LiveOS/squashfs.img'
         )
 
-        # setup bootloader config to boot the ISO via isolinux
-        log.info('Setting up isolinux bootloader configuration')
-        bootloader_config_isolinux = BootLoaderConfig(
-            'isolinux', self.xml_state, self.media_dir
-        )
-        bootloader_config_isolinux.setup_live_boot_images(
-            mbrid=None,
-            lookup_path=self.boot_image.boot_root_directory
-        )
-        bootloader_config_isolinux.setup_live_image_config(
-            mbrid=None
-        )
-        bootloader_config_isolinux.write()
-
         # setup bootloader config to boot the ISO via EFI
         if self.firmware.efi_mode():
             log.info('Setting up EFI grub bootloader configuration')
@@ -223,6 +209,20 @@ class LiveImageBuilder(object):
                 mbrid=self.mbrid
             )
             bootloader_config_grub.write()
+
+        # setup bootloader config to boot the ISO via isolinux
+        log.info('Setting up isolinux bootloader configuration')
+        bootloader_config_isolinux = BootLoaderConfig(
+            'isolinux', self.xml_state, self.media_dir
+        )
+        bootloader_config_isolinux.setup_live_boot_images(
+            mbrid=None,
+            lookup_path=self.boot_image.boot_root_directory
+        )
+        bootloader_config_isolinux.setup_live_image_config(
+            mbrid=None
+        )
+        bootloader_config_isolinux.write()
 
         # call custom editbootconfig script if present
         self.system_setup.call_edit_boot_config_script(

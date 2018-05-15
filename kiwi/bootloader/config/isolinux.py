@@ -261,18 +261,37 @@ class BootLoaderConfigIsoLinux(BootLoaderConfigBase):
             'chain.c32',
             'mboot.c32'
         ]
+        grub_image_file_names = [
+            'eltorito.img',
+            'boot_hybrid.img'
+        ]
         syslinux_dirs = [
             '/usr/share/syslinux/',
             '/usr/lib/syslinux/modules/bios/',
             '/usr/lib/ISOLINUX/'
         ]
+        loader_files = []
+        for grub_image_file_name in grub_image_file_names:
+            grub_file = Defaults.get_grub_path(
+                lookup_path, 'i386-pc/{0}'.format(grub_image_file_name),
+                raise_on_error=False
+            )
+            if os.path.exists(grub_file):
+                loader_files.append(grub_file)
+
         for syslinux_file_name in syslinux_file_names:
             for syslinux_dir in syslinux_dirs:
                 syslinux_file = ''.join(
                     [lookup_path, syslinux_dir, syslinux_file_name]
                 )
                 if os.path.exists(syslinux_file):
-                    shutil.copy(syslinux_file, loader_data)
+                    loader_files.append(syslinux_file)
+
+        for loader_file in loader_files:
+            log.info(
+                'Copying {0} to isolinux loader directory'.format(loader_file)
+            )
+            shutil.copy(loader_file, loader_data)
 
         bash_command = ' '.join(
             ['cp', lookup_path + '/boot/memtest*', loader_data + '/memtest']
